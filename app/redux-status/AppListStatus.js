@@ -17,10 +17,11 @@ export default class AppListStatus {
    */
   loadStatus = AppListStatus.LOAD_STATUS_INIT_LOADING;
 
-  constructor(applist){
-    this.applist = [];
-    if(applist && applist.length && applist.forEach){
-      applist.forEach(function(item, index){
+  constructor(){}
+
+  updateList(dataFromServer){
+    if(dataFromServer &&  dataFromServer.length && dataFromServer.forEach){
+      dataFromServer.forEach(function(item, index){
         let currentItem = new AppDetailStatus(item);
         this.applist.push(currentItem);
       }.bind(this));

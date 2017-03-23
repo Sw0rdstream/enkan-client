@@ -6,7 +6,7 @@ import {NavigationBar as Navigation, CardStack} from '@shoutem/ui/navigation';
 import { navigatePop } from './redux';
 
 import AppList from './AppList';
-//import AppDetails from './AppDetails';
+import AppDetails from './AppDetails';
 
 const theme = {
   '.test':{

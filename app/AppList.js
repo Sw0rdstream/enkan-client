@@ -10,7 +10,7 @@ import {
 import * as Progress from 'react-native-progress';
 
 import { connect } from 'react-redux';
-import { navigatePush, appDownload } from './redux';
+import { navigatePush, appListState, loadAppList } from './redux';
 
 import AppListStatus from './redux-status/AppListStatus';
 
@@ -18,7 +18,8 @@ class AppList extends Component {
   static propTypes = {
     onPress: React.PropTypes.func,
     onDownloadPress: React.PropTypes.func,
-    appListState: React.PropTypes.object
+    appListState: React.PropTypes.object,
+    onLoadFinish: React.PropTypes.func
   };
 
   constructor(props) {
@@ -28,7 +29,9 @@ class AppList extends Component {
   }
 
   componentDidMount(){
-
+    setTimeout(function(){
+      this.props.onLoadFinish(this.tempTestAppDatas());
+    }.bind(this), 3000)
   }
 
   tempTestAppDatas(){
@@ -58,7 +61,10 @@ class AppList extends Component {
             style={{width:48, height:48, borderRadius:24}}
             source={{uri:appData.logo}}
           />
-          <Text>{appData.name}</Text>
+          <View>
+            <Subtitle>{appData.name}</Subtitle>
+            <Text>{appData.version}</Text>
+          </View>
           <Button styleName="clear" onPress={this.onDownloadPress}><Text>DOWNLOAD</Text></Button>
         </Row>
       </TouchableOpacity>
@@ -104,6 +110,9 @@ const mapDispatchToProps = (dispatch) => ({
   },
   onDownloadPress: (appData) => {
 
+  },
+  onLoadFinish: (list) => {
+    dispatch(loadAppList(list));
   }
 });
 

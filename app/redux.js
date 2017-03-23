@@ -46,6 +46,8 @@ export function appListState(state = initAppListState, action){
       break;
     case LIST_ACTION_RESOLVE:
       newState.loadStatus = AppListStatus.LOAD_STATUS_DONE;
+      let list = action.list;
+      newState.updateList(list);
       break;
     case LIST_ACTION_REQUEST:
     default:
@@ -73,4 +75,15 @@ export function navigatePop() {
   return {
     type: NAV_POP,
   };
+}
+
+
+///
+/// Load List Actions
+///
+export function loadAppList(list){
+  return {
+    type: LIST_ACTION_RESOLVE,
+    list: list
+  }
 }
