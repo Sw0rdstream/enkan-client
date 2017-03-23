@@ -80,11 +80,12 @@ class AppList extends Component {
     }
     else{
       return (
-        <Screen>
-          <Row><View styleName="h-center">
-            <Progress.CircleSnail color={['red','green','blue']} />
-          </View></Row>
-        </Screen>
+        <View style={{flex:1, alignItems:'center', justifyContent:'center'}}>
+            <View style={{width:50,height:50, marginTop:-110, marginBottom:20}}>
+              <Progress.CircleSnail color={['red','green','blue']} size={50} duration={700} />
+            </View>
+            <Title>Loading...</Title>
+        </View>
       )
     }
   }
