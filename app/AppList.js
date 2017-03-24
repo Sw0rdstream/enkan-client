@@ -40,32 +40,36 @@ class AppList extends Component {
       "name":"HUE Timeline",
       "version": "17.02.00",
       "buildNumber": 4788291,
+      "size": 7118237,
+      "lastUpdateDate": "2017/01/01",
       "logo": "https://maiw.hue.worksap.com/collabo/img/mobile/com.worksap.company.timeline.mobile.png"
     },{
       "bundleId":"com.worksap.company.talk.mobile",
       "name":"HUE Talk",
       "version": "17.02.00",
       "buildNumber": 4788291,
+      "lastUpdateDate": "2017/01/01",
+      "size" : 7118237,
       "logo": "https://maiw.hue.worksap.com/collabo/img/mobile/com.worksap.company.talk.mobile.png"
     }];
   }
 
 
   renderRow(appData) {
-    const {onPress } = this.props;
+    const {onPress, onDownloadPress } = this.props;
 
     return (
-      <TouchableOpacity onPress={onPress}>
+      <TouchableOpacity onPress={(e) => {onPress(appData)}}>
         <Row>
           <Image
             style={{width:48, height:48, borderRadius:24}}
-            source={{uri:appData.logo}}
+            source={{uri:appData.data.logo}}
           />
           <View>
-            <Subtitle>{appData.name}</Subtitle>
-            <Text>{appData.version}</Text>
+            <Subtitle>{appData.data.name}</Subtitle>
+            <Text>{appData.data.version}</Text>
           </View>
-          <Button styleName="clear" onPress={this.onDownloadPress}><Text>DOWNLOAD</Text></Button>
+          <Button styleName="clear" onPress={(e)=>onDownloadPress(appData)}><Text>DOWNLOAD</Text></Button>
         </Row>
       </TouchableOpacity>
     );
@@ -78,7 +82,7 @@ class AppList extends Component {
       return (
         <Screen>
           <ListView
-            data={this.tempTestAppDatas()}
+            data={appListState.applist}
             renderRow={appData => this.renderRow(appData)}
           />
         </Screen>
@@ -105,11 +109,11 @@ const mapDispatchToProps = (dispatch) => ({
   onPress: (appData) => {
     dispatch(navigatePush({
       key: 'AppDetails',
-      title: 'Details',
+      title: 'Details'
     }, { appData }));
   },
   onDownloadPress: (appData) => {
-
+    dispatch({type:"no_thing"});
   },
   onLoadFinish: (list) => {
     dispatch(loadAppList(list));

@@ -10,7 +10,7 @@ const NAV_POP = 'NAV_POP';
 const initialNavState = {
   index: 0,
   routes: [
-    { key: 'AppList' },
+    { key: 'home', title:'Apps' },
   ],
 };
 
@@ -38,6 +38,9 @@ const LIST_ACTION_REQUEST_PULL = 'LIST_ACTION_REQUEST_PULL';
 const LIST_ACTION_RESOLVE = 'LIST_ACTION_RESOLVE';
 
 export function appListState(state = initAppListState, action){
+  if(action.type && !action.type.startsWith('LIST_ACTION')){
+    return state;
+  }
   let newState = new AppListStatus();
   newState.applist = state.applist;
   switch (action.type) {

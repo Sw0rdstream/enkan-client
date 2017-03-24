@@ -36,12 +36,25 @@ class App extends Component {
 
   renderNavBar(props) {
     const { onNavigateBack } = this.props;
+    const { route } = props.scene;
+
+    let leftComponent = route.key === 'home' ? (<Icon name="sidebar" />) : (<Icon name="back" />);
+    let popBack = route.key === 'home' ? null : onNavigateBack;
+
     return (
       <Navigation.View
         {...props}
         onNavigateBack={onNavigateBack}
-        renderTitleComponent={(e) => {return (<View style={{alignItems:'center', flex:1, justifyContent:'center'}}><Title styleName="v-center h-center">APP LIST</Title></View>);}}
-        renderLeftComponent={(e)=>{return (<View style={{alignItems:'center', flex:1, justifyContent:'center'}}><Button styleName="clear"><Icon name="sidebar" /></Button></View>);}}
+        renderTitleComponent={(e) => {return (
+          <View style={{alignItems:'center', flex:1, justifyContent:'center'}}>
+            <Title styleName="v-center h-center">{route.title}</Title>
+          </View>
+        );}}
+        renderLeftComponent={(e)=>{return (
+          <View style={{alignItems:'center', flex:1, justifyContent:'center'}}>
+            <Button styleName="clear" onPress={popBack}>{leftComponent}</Button>
+          </View>
+        );}}
       />
     );
   }
