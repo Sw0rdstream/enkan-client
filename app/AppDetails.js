@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import {WebView,Linking} from 'react-native';
 import {
   ScrollView,
   Icon,
@@ -18,12 +19,38 @@ import {
 import {
   NavigationBar,
 } from '@shoutem/ui/navigation';
+import * as Progress from 'react-native-progress';
 
 import { connect } from 'react-redux';
+
+import {downloadApp,downloadResolve} from './redux';
 
 class AppDetails extends Component {
   static propTypes = {
   };
+
+  static WEBVIEW_REF = 'download_app_webview';
+
+  renderDownloadArea(appData){
+    const onPress = this.props.onDownloadPress;
+    const isDownloading = appData.isDownloading;
+    if(isDownloading){
+      return (
+        <View style={{height:50, alignItems:'center', justifyContent:'center'}}>
+            <View style={{width:24,height:24}}>
+              <Progress.CircleSnail color={['red','green','blue']} size={24} duration={700} />
+            </View>
+        </View>
+      )
+    }
+    else{
+      return (
+        <Button styleName="full-width clear" style={{backgroundColor:'#00aadf'}} onPress={(e)=>{onPress(appData);}}>
+          <Title style={{color:'white'}}>DOWNLOAD</Title>
+        </Button>
+      )
+    }
+  }
 
   render() {
     const appData = this.props.appData;
@@ -48,6 +75,9 @@ class AppDetails extends Component {
             <Caption>BUILD NUMBER</Caption>
             <Subtitle>{appData.data.buildNumber}</Subtitle>
             <View style={{height:8}}></View>
+            <Caption>APP ID</Caption>
+            <Subtitle>{appData.data.bundleId}</Subtitle>
+            <View style={{height:8}}></View>
             <Caption>SIZE</Caption>
             <Subtitle>{parseInt(appData.data.size/100000)/10} MB</Subtitle>
             <View style={{height:8}}></View>
@@ -56,7 +86,7 @@ class AppDetails extends Component {
           </View>
         </Row>
         <Row>
-          <Button styleName="full-width clear" style={{backgroundColor:'#00aadf'}}><Title style={{color:'white'}}>DOWNLOAD</Title></Button>
+          {this.renderDownloadArea(appData)}
         </Row>
         </View>
       </Screen>
@@ -66,7 +96,19 @@ class AppDetails extends Component {
 
 const mapDispatchToProps = (dispatch) => ({
   onDownloadPress: (appData) => {
+    try{
+      //catch this call because it will return exception always
+      dispatch(downloadApp(appData.data.bundleId));
+      Linking.openURL('itms-services://?action=download-manifest&url=https://maiw.hue.worksap.com/hue/hue/mobile/distribute/mobileappdistribute/downloadPlist%3FbundleId%3D'+appData.data.bundleId)
+      .catch(function(){
+        setTimeout(function(){
+          dispatch(downloadResolve(appData.data.bundleId));
+        }, 1000);
+      });
+    }
+    catch(ex){
 
+    }
   }
 });
 

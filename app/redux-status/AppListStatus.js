@@ -12,19 +12,33 @@ export default class AppListStatus {
   applist = [];
 
   /**
+   * the map of all app data
+   * @type {Object}
+   */
+  appmap = {};
+
+  /**
    * Loading Status
    * @type {Number}
    */
   loadStatus = AppListStatus.LOAD_STATUS_INIT_LOADING;
 
-  constructor(){}
+  constructor(appListStatus){
+    if(appListStatus){
+      this.applist = appListStatus.applist;
+      this.appmap = appListStatus.appmap;
+      this.loadStatus = appListStatus.loadStatus;
+    }
+  }
 
   updateList(dataFromServer){
     if(dataFromServer &&  dataFromServer.length && dataFromServer.forEach){
       dataFromServer.forEach(function(item, index){
         let currentItem = new AppDetailStatus(item);
         this.applist.push(currentItem);
+        this.appmap[item.bundleId] = currentItem;
       }.bind(this));
     }
   }
+
 }
