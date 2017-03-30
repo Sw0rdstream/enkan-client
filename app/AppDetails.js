@@ -53,7 +53,8 @@ class AppDetails extends Component {
   }
 
   render() {
-    const appData = this.props.appData;
+    console.log(this.props);
+    const appData = this.props.navigation.state.params;
     return (
       <Screen style={{flex:1, backgroundColor:'white'}}>
         <View>

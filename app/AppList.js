@@ -59,7 +59,7 @@ class AppList extends Component {
     const {onPress, onDownloadPress } = this.props;
 
     return (
-      <TouchableOpacity onPress={(e) => {onPress(appData)}}>
+      <TouchableOpacity onPress={(e) => {this.props.navigation.navigate('Detail',appData,{type:'NAV'})}}>
         <Row>
           <Image
             style={{width:48, height:48, borderRadius:24}}
@@ -76,6 +76,7 @@ class AppList extends Component {
   }
 
   render() {
+    console.log(this.props.navigation);
     let {appListState} = this.props;
 
     if(appListState.loadStatus === AppListStatus.LOAD_STATUS_DONE){

@@ -1,6 +1,3 @@
-import { combineReducers } from 'redux';
-import * as NavigationStateUtils from 'NavigationStateUtils';
-
 import AppListStatus from './redux-status/AppListStatus';
 
 const NAV_PUSH = 'NAV_PUSH';
@@ -13,7 +10,7 @@ const initialNavState = {
     { key: 'home', title:'Apps' },
   ],
 };
-
+/*
 function navigationState(state = initialNavState, action) {
   switch (action.type) {
     case NAV_PUSH:
@@ -27,7 +24,8 @@ function navigationState(state = initialNavState, action) {
     default:
       return state;
   }
-}
+}*/
+
 
 ////
 //// App List State Reducer
@@ -70,10 +68,6 @@ export function appListState(state = initAppListState, action){
   return newState;
 }
 
-export default combineReducers({
-  navigationState,
-  appListState
-});
 
 export function navigatePush(route, props) {
   return {
