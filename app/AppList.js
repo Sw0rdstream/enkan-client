@@ -1,31 +1,40 @@
 import React, { Component } from 'react';
 import {
-  Image,  ListView,  Title,  Subtitle,  TouchableOpacity,  Screen,  Row, Text, Button, Spinner, View
+  Image,  Title,  Subtitle,  TouchableOpacity,  Screen,  Row, Text, Button, Spinner, View, Icon
 } from '@shoutem/ui';
 
-import {
-  NavigationBar,
-} from '@shoutem/ui/navigation';
+import {ListView, RefreshControl} from 'react-native';
 
 import * as Progress from 'react-native-progress';
 
 import { connect } from 'react-redux';
-import { navigatePush, appListState, loadAppList } from './redux';
-
+import { navigatePush, appListState, loadAppList,startPullList } from './redux';
+import {downloadApp} from './services/AppDownloadService';
 import AppListStatus from './redux-status/AppListStatus';
 
 class AppList extends Component {
   static propTypes = {
-    onPress: React.PropTypes.func,
     onDownloadPress: React.PropTypes.func,
     appListState: React.PropTypes.object,
-    onLoadFinish: React.PropTypes.func
+    onLoadFinish: React.PropTypes.func,
+  };
+
+  static navigationOptions = {
+    title: 'APP LIST' ,
+    header: ({state, setParams, goBack, navigate}) => {
+      let left = (
+        <View style={{alignItems:'center', flex:1, justifyContent:'center'}}>
+          <Button styleName="clear"><Icon name="sidebar" /></Button>
+        </View>
+      );
+      return {left}
+    },
   };
 
   constructor(props) {
     super(props);
     this.renderRow = this.renderRow.bind(this);
-    this.onDownloadPress = this.onDownloadPress.bind(this);
+    this.renderDownloadArea = this.renderDownloadArea.bind(this);
   }
 
   componentDidMount(){
@@ -56,8 +65,8 @@ class AppList extends Component {
 
 
   renderRow(appData) {
-    const {onPress, onDownloadPress } = this.props;
-
+    const { onDownloadPress } = this.props;
+    console.log(appData);
     return (
       <TouchableOpacity onPress={(e) => {this.props.navigation.navigate('Detail',appData,{type:'NAV'})}}>
         <Row>
@@ -69,22 +78,54 @@ class AppList extends Component {
             <Subtitle>{appData.data.name}</Subtitle>
             <Text>{appData.data.version}</Text>
           </View>
-          <Button styleName="clear" onPress={(e)=>onDownloadPress(appData)}><Text>DOWNLOAD</Text></Button>
+          {this.renderDownloadArea(appData)}
         </Row>
       </TouchableOpacity>
     );
   }
 
-  render() {
-    console.log(this.props.navigation);
-    let {appListState} = this.props;
+  renderDownloadArea(appData){
+    const onDownloadPress = this.props.onDownloadPress;
+    const isDownloading = appData.isDownloading;
+    console.log(appData);
+    if(isDownloading){
+      return (
+        <View style={{flex:1, alignItems:'center', justifyContent:'center'}}>
+            <View style={{width:24,height:24}}>
+              <Progress.CircleSnail color={['red','green','blue']} size={24} duration={700} />
+            </View>
+        </View>
+      )
+    }
+    else{
+      return (
+        <Button styleName="clear" onPress={(e)=>onDownloadPress(appData)}><Text>DOWNLOAD</Text></Button>
+      )
+    }
+  }
 
-    if(appListState.loadStatus === AppListStatus.LOAD_STATUS_DONE){
+  render() {
+    let {appListState,onRefresh,onLoadStart} = this.props;
+    console.log(appListState);
+    let ds = new ListView.DataSource({rowHasChanged: (r1,r2) => r1 !== r2});
+    let dataSource = ds.cloneWithRows(appListState.applist);
+    if(appListState.loadStatus != AppListStatus.LOAD_STATUS_INIT_LOADING){
       return (
         <Screen>
           <ListView
-            data={appListState.applist}
+            dataSource={dataSource}
             renderRow={appData => this.renderRow(appData)}
+            refreshControl = {
+              <RefreshControl
+                refreshing={appListState.loadStatus === AppListStatus.LOAD_STATUS_PULL_LOADING}
+                onRefresh={()=>{
+                  onLoadStart();
+                  setTimeout(function(){
+                    this.props.onLoadFinish(this.tempTestAppDatas());
+                  }.bind(this), 3000)
+                }}
+              />
+            }
           />
         </Screen>
       );
@@ -101,23 +142,17 @@ class AppList extends Component {
     }
   }
 
-  onDownloadPress(appData){
-    console.log(appData);
-  }
 }
 
 const mapDispatchToProps = (dispatch) => ({
-  onPress: (appData) => {
-    dispatch(navigatePush({
-      key: 'AppDetails',
-      title: 'Details'
-    }, { appData }));
-  },
   onDownloadPress: (appData) => {
-    dispatch({type:"no_thing"});
+    downloadApp(dispatch, appData.data.bundleId);
   },
   onLoadFinish: (list) => {
     dispatch(loadAppList(list));
+  },
+  onLoadStart: () => {
+    dispatch(startPullList());
   }
 });
 

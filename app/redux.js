@@ -97,9 +97,18 @@ export function loadAppList(list){
 }
 
 ///
+/// Start Pull Action
+///
+export function startPullList(){
+  return {
+    type: LIST_ACTION_REQUEST_PULL,
+  }
+}
+
+///
 /// Download
 ///
-export function downloadApp(bundleId){
+export function downloadStart(bundleId){
     return {
       type: LIST_ACTION_DOWNLOAD,
       bundleId:bundleId

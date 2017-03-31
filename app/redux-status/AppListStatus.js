@@ -32,6 +32,9 @@ export default class AppListStatus {
   }
 
   updateList(dataFromServer){
+    delete this.applist;
+    this.applist = [];
+
     if(dataFromServer &&  dataFromServer.length && dataFromServer.forEach){
       dataFromServer.forEach(function(item, index){
         let currentItem = new AppDetailStatus(item);

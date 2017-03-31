@@ -16,10 +16,15 @@ const AppNavigator = StackNavigator({
   Detail: {screen: AppDetails}
 })
 const initialNavState = AppNavigator.router.getStateForAction({type:'@ANY'}, undefined);
+const NAV_ACTION_PREFIX = 'Navigation/';
 const navigationState = (state = initialNavState, action) => {
-  console.log(state, action);
-  const newState = AppNavigator.router.getStateForAction(action, state);
-  return newState || state;
+  if(action.type.startsWith(NAV_ACTION_PREFIX)){
+    console.log("Reduce in NavReducer: ", state, action);
+    return AppNavigator.router.getStateForAction(action, state);
+  }
+  else{
+    return state || initialNavState;
+  }
 }
 
 const reducer = combineReducers({
@@ -45,7 +50,6 @@ class AppWithNavigationState extends Component{
 
 const App = connect(
   state => {
-    console.log(state);
     return {navigationState: state.navigationState};
   }
 )(AppWithNavigationState);

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {WebView,Linking} from 'react-native';
+import {downloadApp} from './services/AppDownloadService';
 import {
   ScrollView,
   Icon,
@@ -23,13 +23,21 @@ import * as Progress from 'react-native-progress';
 
 import { connect } from 'react-redux';
 
-import {downloadApp,downloadResolve} from './redux';
-
 class AppDetails extends Component {
   static propTypes = {
   };
 
-  static WEBVIEW_REF = 'download_app_webview';
+  static navigationOptions = {
+    title: 'APP DETAIL',
+    header: ({state, setParams, goBack, navigate}) => {
+      let left = (
+        <View style={{alignItems:'center', flex:1, justifyContent:'center'}}>
+          <Button styleName="clear" onPress={() => {goBack();}}><Icon name="back" /></Button>
+        </View>
+      );
+      return {left}
+    },
+  }
 
   renderDownloadArea(appData){
     const onPress = this.props.onDownloadPress;
@@ -82,7 +90,7 @@ class AppDetails extends Component {
             <Caption>SIZE</Caption>
             <Subtitle>{parseInt(appData.data.size/100000)/10} MB</Subtitle>
             <View style={{height:8}}></View>
-            <Caption>LAST UPDATE</Caption>
+            <Caption>RELEASE DATE</Caption>
             <Subtitle>{appData.data.lastUpdateDate}</Subtitle>
           </View>
         </Row>
@@ -97,19 +105,7 @@ class AppDetails extends Component {
 
 const mapDispatchToProps = (dispatch) => ({
   onDownloadPress: (appData) => {
-    try{
-      //catch this call because it will return exception always
-      dispatch(downloadApp(appData.data.bundleId));
-      Linking.openURL('itms-services://?action=download-manifest&url=https://maiw.hue.worksap.com/hue/hue/mobile/distribute/mobileappdistribute/downloadPlist%3FbundleId%3D'+appData.data.bundleId)
-      .catch(function(){
-        setTimeout(function(){
-          dispatch(downloadResolve(appData.data.bundleId));
-        }, 1000);
-      });
-    }
-    catch(ex){
-
-    }
+    downloadApp(dispatch, appData.data.bundleId);
   }
 });
 
