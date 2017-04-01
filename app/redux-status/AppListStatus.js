@@ -2,6 +2,7 @@ import AppDetailStatus from './AppDetailStatus';
 export default class AppListStatus {
   static LOAD_STATUS_INIT_LOADING = -1;
   static LOAD_STATUS_PULL_LOADING = -2;
+  static LOAD_STATUS_NO_SETTING = 2;
   static LOAD_STATUS_DONE = 0;
   static LOAD_STATUS_ERROR = 1;
 
@@ -21,7 +22,7 @@ export default class AppListStatus {
    * Loading Status
    * @type {Number}
    */
-  loadStatus = AppListStatus.LOAD_STATUS_INIT_LOADING;
+  loadStatus = AppListStatus.LOAD_STATUS_NO_SETTING;
 
   constructor(appListStatus){
     if(appListStatus){

@@ -7,7 +7,8 @@ import thunk from 'redux-thunk';
 import {addNavigationHelpers, StackNavigator} from 'react-navigation';
 import AppList from './app/AppList';
 import AppDetails from './app/AppDetails';
-import {appListState} from './app/redux';
+import Settings from './app/Settings';
+import {appListState,settingsState} from './app/redux';
 //
 // Nav Reducer
 //
@@ -29,7 +30,8 @@ const navigationState = (state = initialNavState, action) => {
 
 const reducer = combineReducers({
   navigationState,
-  appListState
+  appListState,
+  settingsState
 });
 
 const createStoreWithMiddleware = applyMiddleware(thunk)(createStore);

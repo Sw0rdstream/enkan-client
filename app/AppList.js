@@ -3,14 +3,16 @@ import {
   Image,  Title,  Subtitle,  TouchableOpacity,  Screen,  Row, Text, Button, Spinner, View, Icon
 } from '@shoutem/ui';
 
-import {ListView, RefreshControl} from 'react-native';
+import {ListView, RefreshControl, Modal} from 'react-native';
 
 import * as Progress from 'react-native-progress';
 
 import { connect } from 'react-redux';
-import { navigatePush, appListState, loadAppList,startPullList } from './redux';
+import { navigatePush, appListState, loadAppList,startPullList, settingsActionShow} from './redux';
 import {downloadApp} from './services/AppDownloadService';
 import AppListStatus from './redux-status/AppListStatus';
+
+import Settings from './Settings';
 
 class AppList extends Component {
   static propTypes = {
@@ -20,15 +22,21 @@ class AppList extends Component {
   };
 
   static navigationOptions = {
-    title: 'APP LIST' ,
     header: ({state, setParams, goBack, navigate}) => {
       let left = (
         <View style={{alignItems:'center', flex:1, justifyContent:'center'}}>
-          <Button styleName="clear"><Icon name="sidebar" /></Button>
+          <Button styleName="clear" onPress={()=>{
+            if(AppList.dispatch){
+              AppList.dispatch(settingsActionShow());
+            }
+          }}><Icon name="settings" /></Button>
         </View>
       );
-      return {left}
-    },
+      let title = (
+        <Title>APP LIST</Title>
+      );
+      return {left, title, style:{backgroundColor: '#FFFFFF'}}
+    }
   };
 
   constructor(props) {
@@ -38,9 +46,14 @@ class AppList extends Component {
   }
 
   componentDidMount(){
-    setTimeout(function(){
-      this.props.onLoadFinish(this.tempTestAppDatas());
-    }.bind(this), 3000)
+    fetch('http://hue-smartdevice.sv.workslan/api/apps/list/ios')
+    .then((response) => response.json())
+    .then((applistJson) => {
+      this.props.onLoadFinish(applistJson);
+    }).catch((error)=>{
+      console.warn('SERVER http://hue-smartdevice.sv.workslan cannot be connected');
+    });
+
   }
 
   tempTestAppDatas(){
@@ -66,13 +79,12 @@ class AppList extends Component {
 
   renderRow(appData) {
     const { onDownloadPress } = this.props;
-    console.log(appData);
     return (
-      <TouchableOpacity onPress={(e) => {this.props.navigation.navigate('Detail',appData,{type:'NAV'})}}>
+      <TouchableOpacity onPress={(e) => {this.props.navigation.navigate('Detail',appData)}}>
         <Row>
           <Image
             style={{width:48, height:48, borderRadius:24}}
-            source={{uri:appData.data.logo}}
+            source={{uri: 'https://maiw.hue.worksap.com/collabo/img/mobile/' + appData.data.bundleId.replace('.release', '') + '.png'}}
           />
           <View>
             <Subtitle>{appData.data.name}</Subtitle>
@@ -87,7 +99,6 @@ class AppList extends Component {
   renderDownloadArea(appData){
     const onDownloadPress = this.props.onDownloadPress;
     const isDownloading = appData.isDownloading;
-    console.log(appData);
     if(isDownloading){
       return (
         <View style={{flex:1, alignItems:'center', justifyContent:'center'}}>
@@ -104,12 +115,53 @@ class AppList extends Component {
     }
   }
 
+  renderSettingsModal(){
+    return(
+      <Modal animationType={"slide"} transparent={true} visible={this.props.settingsState.display}>
+        <View style={{flex:1}}>
+          <Settings />
+        </View>
+      </Modal>
+    );
+  }
+
+
   render() {
     let {appListState,onRefresh,onLoadStart} = this.props;
-    console.log(appListState);
     let ds = new ListView.DataSource({rowHasChanged: (r1,r2) => r1 !== r2});
     let dataSource = ds.cloneWithRows(appListState.applist);
-    if(appListState.loadStatus != AppListStatus.LOAD_STATUS_INIT_LOADING){
+    console.log(this.props.settingsState);
+    if(appListState.loadStatus == AppListStatus.LOAD_STATUS_NO_SETTING){
+      return (
+        <View style={{flex:1, alignItems:'center', justifyContent:'center', marginTop:-110}}>
+            <Icon style={{fontSize:90}} name="edit"></Icon>
+            <View style={{marginTop:16}}><Title>No Valid Setting</Title></View>
+            {this.renderSettingsModal()}
+        </View>
+      )
+    }
+    else if(appListState.loadStatus == AppListStatus.LOAD_STATUS_ERROR){
+      return (
+        <View style={{flex:1, alignItems:'center', justifyContent:'center', marginTop:-110}}>
+            <Icon style={{fontSize:90}} name="error"></Icon>
+            <View style={{marginTop:4, marginBottom:16}}><Title>Server Internal Error</Title></View>
+            <Button styleName="clear"><Icon name="refresh"></Icon><Text>Retry</Text></Button>
+            {this.renderSettingsModal()}
+        </View>
+      )
+    }
+    else if(appListState.loadStatus == AppListStatus.LOAD_STATUS_INIT_LOADING){
+      return (
+        <View style={{flex:1, alignItems:'center', justifyContent:'center'}}>
+            <View style={{width:50,height:50, marginTop:-110, marginBottom:20}}>
+              <Progress.CircleSnail color={['red','green','blue']} size={50} duration={700} />
+            </View>
+            <Title>Loading...</Title>
+            {this.renderSettingsModal()}
+        </View>
+      )
+    }
+    else{
       return (
         <Screen>
           <ListView
@@ -127,36 +179,33 @@ class AppList extends Component {
               />
             }
           />
+          {this.renderSettingsModal()}
         </Screen>
       );
-    }
-    else{
-      return (
-        <View style={{flex:1, alignItems:'center', justifyContent:'center'}}>
-            <View style={{width:50,height:50, marginTop:-110, marginBottom:20}}>
-              <Progress.CircleSnail color={['red','green','blue']} size={50} duration={700} />
-            </View>
-            <Title>Loading...</Title>
-        </View>
-      )
     }
   }
 
 }
 
-const mapDispatchToProps = (dispatch) => ({
-  onDownloadPress: (appData) => {
-    downloadApp(dispatch, appData.data.bundleId);
-  },
-  onLoadFinish: (list) => {
-    dispatch(loadAppList(list));
-  },
-  onLoadStart: () => {
-    dispatch(startPullList());
-  }
-});
+const mapDispatchToProps = (dispatch) => {
+  AppList.dispatch = dispatch;
+  return {
+    onDownloadPress: (appData) => {
+      downloadApp(dispatch, appData.data.bundleId);
+    },
+    onLoadFinish: (list) => {
+      dispatch(loadAppList(list));
+    },
+    onLoadStart: () => {
+      dispatch(startPullList());
+    }
+  };
+};
 
 export default connect(
-	state => ({appListState:state.appListState}),
+	state => {
+    AppList.settingsState = state.settingsState;
+    return {appListState:state.appListState, settingsState:state.settingsState};
+  },
 	mapDispatchToProps
 )(AppList);

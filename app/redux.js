@@ -4,29 +4,6 @@ const NAV_PUSH = 'NAV_PUSH';
 const NAV_POP = 'NAV_POP';
 
 
-const initialNavState = {
-  index: 0,
-  routes: [
-    { key: 'home', title:'Apps' },
-  ],
-};
-/*
-function navigationState(state = initialNavState, action) {
-  switch (action.type) {
-    case NAV_PUSH:
-      if (state.routes[state.index].key === (action.state && action.state.key)) return state;
-      return NavigationStateUtils.push(state, action.state);
-
-    case NAV_POP:
-      if (state.index === 0 || state.routes.length === 1) return state;
-      return NavigationStateUtils.pop(state);
-
-    default:
-      return state;
-  }
-}*/
-
-
 ////
 //// App List State Reducer
 ////
@@ -36,6 +13,7 @@ const LIST_ACTION_REQUEST_PULL = 'LIST_ACTION_REQUEST_PULL';
 const LIST_ACTION_RESOLVE = 'LIST_ACTION_RESOLVE';
 const LIST_ACTION_DOWNLOAD = 'LIST_ACTION_DOWNLOAD';
 const LIST_ACTION_DOWNLOAD_RESOLVE = 'LIST_ACTION_DOWNLOAD_RESOLVE';
+const LIST_ACTION_SETTING_DONE = 'LIST_ACTION_SETTING_DONE';
 
 export function appListState(state = initAppListState, action){
   if(action.type && !action.type.startsWith('LIST_ACTION')){
@@ -62,27 +40,13 @@ export function appListState(state = initAppListState, action){
       }
       break;
     case LIST_ACTION_REQUEST:
-    default:
+    case LIST_ACTION_SETTING_DONE:
       newState.loadStatus = AppListStatus.LOAD_STATUS_INIT_LOADING;
+      return
+    default:
+      newState.loadStatus = AppListStatus.LOAD_STATUS_NO_SETTING;
   }
   return newState;
-}
-
-
-export function navigatePush(route, props) {
-  return {
-    type: NAV_PUSH,
-    state: {
-      ...route,
-      props,
-    },
-  };
-}
-
-export function navigatePop() {
-  return {
-    type: NAV_POP,
-  };
 }
 
 
@@ -119,4 +83,51 @@ export function downloadResolve(bundleId){
     type: LIST_ACTION_DOWNLOAD_RESOLVE,
     bundleId:bundleId
   }
+}
+
+
+//
+// reducer of setting
+//
+const initSettingsState = {
+  display: false,
+  serverDomain: '',
+  enablePush: false,
+  formSubmitting: false,
+};
+
+const SETTINGS_ACTION_SHOW = 'SETTINGS_ACTION_SHOW';
+const SETTINGS_ACTION_HIDE = 'SETTINGS_ACTION_HIDE';
+
+export function settingsState(state = initSettingsState, action){
+  if(!action.type.startsWith('SETTINGS_ACTION_')){
+    return state;
+  }
+  let newState = {
+    display: state.display,
+    serverDomain: state.serverDomain,
+    enablePush: state.enablePush,
+    formSubmitting: state.formSubmitting,
+  }
+  switch (action.type){
+    case SETTINGS_ACTION_HIDE:
+      newState.display = false;
+      break;
+    case SETTINGS_ACTION_SHOW:
+      newState.display = true;
+      break;
+  }
+  return newState;
+}
+
+export function settingsActionShow(){
+  return {
+    type:SETTINGS_ACTION_SHOW
+  };
+}
+
+export function settingsActionHide(){
+  return {
+    type:SETTINGS_ACTION_HIDE
+  };
 }

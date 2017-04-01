@@ -4,7 +4,7 @@ export function downloadApp(dispatch, bundleId){
   try{
     //catch this call because it will return exception always
     dispatch(downloadStart(bundleId));
-    Linking.openURL('itms-services://?action=download-manifest&url=https://maiw.hue.worksap.com/hue/hue/mobile/distribute/mobileappdistribute/downloadPlist%3FbundleId%3D'+bundleId)
+    Linking.openURL('itms-services://?action=download-manifest&url=https://hue-smartdevice.sv.workslan/api/apps/'+bundleId+'/ios')
     .catch(function(){
       setTimeout(function(){
         dispatch(downloadResolve(bundleId));

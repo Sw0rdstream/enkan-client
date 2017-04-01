@@ -35,7 +35,7 @@ class AppDetails extends Component {
           <Button styleName="clear" onPress={() => {goBack();}}><Icon name="back" /></Button>
         </View>
       );
-      return {left}
+      return {left, style:{backgroundColor:'#ffffff'}}
     },
   }
 
@@ -69,7 +69,7 @@ class AppDetails extends Component {
         <Row>
           <Image
             style={{width:64, height:64}}
-            source={{uri:appData.data.logo}}
+            source={{uri: 'https://maiw.hue.worksap.com/collabo/img/mobile/' + appData.data.bundleId.replace('.release', '') + '.png'}}
           />
           <View styleName="vertical stretch">
             <Caption>APP NAME</Caption>
@@ -82,7 +82,7 @@ class AppDetails extends Component {
             <Subtitle>{appData.data.version}</Subtitle>
             <View style={{height:8}}></View>
             <Caption>BUILD NUMBER</Caption>
-            <Subtitle>{appData.data.buildNumber}</Subtitle>
+            <Subtitle>{appData.data.build}</Subtitle>
             <View style={{height:8}}></View>
             <Caption>APP ID</Caption>
             <Subtitle>{appData.data.bundleId}</Subtitle>
@@ -91,7 +91,7 @@ class AppDetails extends Component {
             <Subtitle>{parseInt(appData.data.size/100000)/10} MB</Subtitle>
             <View style={{height:8}}></View>
             <Caption>RELEASE DATE</Caption>
-            <Subtitle>{appData.data.lastUpdateDate}</Subtitle>
+            <Subtitle>{new Date(appData.data.uploadTime).toLocaleDateString()}</Subtitle>
           </View>
         </Row>
         <Row>
