@@ -13,12 +13,15 @@ import {downloadApp} from './services/AppDownloadService';
 import AppListStatus from './redux-status/AppListStatus';
 
 import Settings from './Settings';
+import ReduxService from './global/ReduxService';
+import SettingsService from './services/SettingsService';
 
 class AppList extends Component {
   static propTypes = {
     onDownloadPress: React.PropTypes.func,
     appListState: React.PropTypes.object,
     onLoadFinish: React.PropTypes.func,
+    actionPopSettings: React.PropTypes.func,
   };
 
   static navigationOptions = {
@@ -26,9 +29,7 @@ class AppList extends Component {
       let left = (
         <View style={{alignItems:'center', flex:1, justifyContent:'center'}}>
           <Button styleName="clear" onPress={()=>{
-            if(AppList.dispatch){
-              AppList.dispatch(settingsActionShow());
-            }
+            ReduxService.dispatch(settingsActionShow());
           }}><Icon name="settings" /></Button>
         </View>
       );
@@ -46,6 +47,8 @@ class AppList extends Component {
   }
 
   componentDidMount(){
+    let {actionPopSettings} = this.props;
+/*
     fetch('http://hue-smartdevice.sv.workslan/api/apps/list/ios')
     .then((response) => response.json())
     .then((applistJson) => {
@@ -53,7 +56,28 @@ class AppList extends Component {
     }).catch((error)=>{
       console.warn('SERVER http://hue-smartdevice.sv.workslan cannot be connected');
     });
-
+*/
+    const currentSettings = SettingsService.getCurrentSettings();
+    if(currentSettings){
+      fetch('https://' + currentSettings.serverDomain + '/api/apps/list/ios')
+      .then((response) => response.json())
+      .then((applistJson) => {
+        this.props.onLoadFinish(applistJson);
+      }).catch((error)=>{
+        console.warn('SERVER http://hue-smartdevice.sv.workslan cannot be connected');
+      });
+    }
+    else{
+      actionPopSettings();
+      fetch('https://hue-smartdevice.sv.workslan/api/apps/list/ios')
+      .then((response) => response.json())
+      .then((applistJson) => {
+        this.props.onLoadFinish(applistJson);
+      }).catch((error)=>{
+        console.warn(error);
+        console.warn('SERVER http://hue-smartdevice.sv.workslan cannot be connected');
+      });
+    }
   }
 
   tempTestAppDatas(){
@@ -188,7 +212,6 @@ class AppList extends Component {
 }
 
 const mapDispatchToProps = (dispatch) => {
-  AppList.dispatch = dispatch;
   return {
     onDownloadPress: (appData) => {
       downloadApp(dispatch, appData.data.bundleId);
@@ -198,6 +221,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     onLoadStart: () => {
       dispatch(startPullList());
+    },
+    actionPopSettings: () => {
+      dispatch(settingsActionShow());
     }
   };
 };

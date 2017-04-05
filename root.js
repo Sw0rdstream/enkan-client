@@ -3,12 +3,14 @@ import { createStore, applyMiddleware, combineReducers } from 'redux';
 import { Provider, connect } from 'react-redux';
 import thunk from 'redux-thunk';
 
-
 import {addNavigationHelpers, StackNavigator} from 'react-navigation';
 import AppList from './app/AppList';
 import AppDetails from './app/AppDetails';
 import Settings from './app/Settings';
 import {appListState,settingsState} from './app/redux';
+
+import ReduxService from './app/global/ReduxService';
+
 //
 // Nav Reducer
 //
@@ -36,7 +38,7 @@ const reducer = combineReducers({
 
 const createStoreWithMiddleware = applyMiddleware(thunk)(createStore);
 const store = createStoreWithMiddleware(reducer);
-
+ReduxService.init(store);
 
 class AppWithNavigationState extends Component{
   render() {
