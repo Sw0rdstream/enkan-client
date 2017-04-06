@@ -116,7 +116,7 @@ class AppList extends Component {
 
   render() {
     console.log(ReduxService.store.getState());
-    let {appListState,onRefresh,onLoadStart} = this.props;
+    let {appListState,onRefresh,onLoadStart, onLoadFinish} = this.props;
     let ds = new ListView.DataSource({rowHasChanged: (r1,r2) => r1 !== r2});
     let dataSource = ds.cloneWithRows(appListState.applist);
     console.log(this.props.settingsState);
@@ -161,9 +161,11 @@ class AppList extends Component {
                 refreshing={appListState.loadStatus === AppListStatus.LOAD_STATUS_PULL_LOADING}
                 onRefresh={()=>{
                   onLoadStart();
-                  setTimeout(function(){
-                    this.props.onLoadFinish(this.tempTestAppDatas());
-                  }.bind(this), 3000)
+                  AppListService.loadAppList().then((applistJson) => {
+                    onLoadFinish(applistJson);
+                  }).catch((rejectCode) => {
+                    alert('Network error happens');
+                  })
                 }}
               />
             }
