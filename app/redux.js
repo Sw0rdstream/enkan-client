@@ -15,6 +15,7 @@ const LIST_ACTION_DOWNLOAD = 'LIST_ACTION_DOWNLOAD';
 const LIST_ACTION_DOWNLOAD_RESOLVE = 'LIST_ACTION_DOWNLOAD_RESOLVE';
 const LIST_ACTION_SETTING_DONE = 'LIST_ACTION_SETTING_DONE';
 const LIST_ACTION_ERROR = 'LIST_ACTION_ERROR';
+const LIST_ACTION_NOSETTINGS = 'LIST_ACTION_NOSETTINGS';
 
 export function appListState(state = initAppListState, action){
   if(action.type && !action.type.startsWith('LIST_ACTION')){
@@ -46,7 +47,7 @@ export function appListState(state = initAppListState, action){
     case LIST_ACTION_ERROR:
       newState.loadStatus = AppListStatus.LOAD_STATUS_ERROR;
       break;
-    default:
+    case LIST_ACTION_NOSETTINGS:
       newState.loadStatus = AppListStatus.LOAD_STATUS_NO_SETTING;
   }
   return newState;
@@ -87,6 +88,15 @@ export function showInitialRequest(){
 export function showErrorList(){
   return {
     type: LIST_ACTION_ERROR,
+  }
+}
+
+///
+/// show error page of list
+///
+export function showNoSettings(){
+  return {
+    type: LIST_ACTION_NOSETTINGS,
   }
 }
 

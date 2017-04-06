@@ -8,7 +8,7 @@ import {ListView, RefreshControl, Modal} from 'react-native';
 import * as Progress from 'react-native-progress';
 
 import { connect } from 'react-redux';
-import { navigatePush, appListState, loadAppList,startPullList, settingsActionShow, showErrorList} from './redux';
+import { navigatePush, appListState, loadAppList,startPullList, settingsActionShow, showErrorList, showNoSettings} from './redux';
 import {downloadApp} from './services/AppDownloadService';
 import AppListStatus from './redux-status/AppListStatus';
 
@@ -49,11 +49,12 @@ class AppList extends Component {
   }
 
   componentDidMount(){
-    let {actionPopSettings,showErrorPage} = this.props;
+    let {actionPopSettings,showErrorPage, showNoSettingsPage} = this.props;
     AppListService.loadAppList().then((applistJson) => {
       this.props.onLoadFinish(applistJson);
     }).catch((rejectCode) => {
       if(rejectCode == AppListService.LOAD_REJECT_NOSETTING){
+        showNoSettingsPage();
         actionPopSettings();
       }
       else{
@@ -191,6 +192,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     showErrorPage: () =>{
       dispatch(showErrorList());
+    },
+    showNoSettingsPage: () => {
+      dispatch(showNoSettings());
     }
   };
 };
