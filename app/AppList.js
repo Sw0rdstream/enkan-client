@@ -8,13 +8,15 @@ import {ListView, RefreshControl, Modal} from 'react-native';
 import * as Progress from 'react-native-progress';
 
 import { connect } from 'react-redux';
-import { navigatePush, appListState, loadAppList,startPullList, settingsActionShow} from './redux';
+import { navigatePush, appListState, loadAppList,startPullList, settingsActionShow, showErrorList} from './redux';
 import {downloadApp} from './services/AppDownloadService';
 import AppListStatus from './redux-status/AppListStatus';
 
 import Settings from './Settings';
 import ReduxService from './global/ReduxService';
 import SettingsService from './services/SettingsService';
+import SettingsController from './redux-controllers/SettingsController';
+import AppListService from './services/AppListService';
 
 class AppList extends Component {
   static propTypes = {
@@ -47,57 +49,17 @@ class AppList extends Component {
   }
 
   componentDidMount(){
-    let {actionPopSettings} = this.props;
-/*
-    fetch('http://hue-smartdevice.sv.workslan/api/apps/list/ios')
-    .then((response) => response.json())
-    .then((applistJson) => {
+    let {actionPopSettings,showErrorPage} = this.props;
+    AppListService.loadAppList().then((applistJson) => {
       this.props.onLoadFinish(applistJson);
-    }).catch((error)=>{
-      console.warn('SERVER http://hue-smartdevice.sv.workslan cannot be connected');
-    });
-*/
-    const currentSettings = SettingsService.getCurrentSettings();
-    if(currentSettings){
-      fetch('https://' + currentSettings.serverDomain + '/api/apps/list/ios')
-      .then((response) => response.json())
-      .then((applistJson) => {
-        this.props.onLoadFinish(applistJson);
-      }).catch((error)=>{
-        console.warn('SERVER http://hue-smartdevice.sv.workslan cannot be connected');
-      });
-    }
-    else{
-      actionPopSettings();
-      fetch('https://hue-smartdevice.sv.workslan/api/apps/list/ios')
-      .then((response) => response.json())
-      .then((applistJson) => {
-        this.props.onLoadFinish(applistJson);
-      }).catch((error)=>{
-        console.warn(error);
-        console.warn('SERVER http://hue-smartdevice.sv.workslan cannot be connected');
-      });
-    }
-  }
-
-  tempTestAppDatas(){
-    return  [{
-      "bundleId":"com.worksap.company.timeline.mobile",
-      "name":"HUE Timeline",
-      "version": "17.02.00",
-      "buildNumber": 4788291,
-      "size": 7118237,
-      "lastUpdateDate": "2017/01/01",
-      "logo": "https://maiw.hue.worksap.com/collabo/img/mobile/com.worksap.company.timeline.mobile.png"
-    },{
-      "bundleId":"com.worksap.company.talk.mobile",
-      "name":"HUE Talk",
-      "version": "17.02.00",
-      "buildNumber": 4788291,
-      "lastUpdateDate": "2017/01/01",
-      "size" : 7118237,
-      "logo": "https://maiw.hue.worksap.com/collabo/img/mobile/com.worksap.company.talk.mobile.png"
-    }];
+    }).catch((rejectCode) => {
+      if(rejectCode == AppListService.LOAD_REJECT_NOSETTING){
+        actionPopSettings();
+      }
+      else{
+        showErrorPage();
+      }
+    })
   }
 
 
@@ -140,10 +102,11 @@ class AppList extends Component {
   }
 
   renderSettingsModal(){
+    console.log(this.props.settingsState);
     return(
       <Modal animationType={"slide"} transparent={true} visible={this.props.settingsState.display}>
         <View style={{flex:1}}>
-          <Settings />
+          <Settings screenProps={this.props.settingsState} />
         </View>
       </Modal>
     );
@@ -151,6 +114,7 @@ class AppList extends Component {
 
 
   render() {
+    console.log(ReduxService.store.getState());
     let {appListState,onRefresh,onLoadStart} = this.props;
     let ds = new ListView.DataSource({rowHasChanged: (r1,r2) => r1 !== r2});
     let dataSource = ds.cloneWithRows(appListState.applist);
@@ -224,14 +188,16 @@ const mapDispatchToProps = (dispatch) => {
     },
     actionPopSettings: () => {
       dispatch(settingsActionShow());
+    },
+    showErrorPage: () =>{
+      dispatch(showErrorList());
     }
   };
 };
 
 export default connect(
 	state => {
-    AppList.settingsState = state.settingsState;
-    return {appListState:state.appListState, settingsState:state.settingsState};
+    return state;
   },
 	mapDispatchToProps
 )(AppList);

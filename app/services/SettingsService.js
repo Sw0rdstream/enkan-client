@@ -17,8 +17,10 @@ class SettingsService {
   }
 
   updateSettings(settingsPOJO){
-    Settings.set(SettingsService.SETTINGS_DICT_DOMAIN, settingsPOJO.serverDomain);
-    Settings.set(SettingsService.SETTINGS_DICT_ENABLEPUSH, settingsPOJO.enablePush);
+    let settingObj = {};
+    settingObj[SettingsService.SETTINGS_DICT_DOMAIN] = settingsPOJO.serverDomain;
+    settingObj[SettingsService.SETTINGS_DICT_ENABLEPUSH] = settingsPOJO.enablePush;
+    Settings.set(settingObj);
     this.reloadSettings();
   }
 
@@ -34,6 +36,21 @@ class SettingsService {
       this.currentSettings = null;
     }
     return this.currentSettings;
+  }
+
+  /**
+   * Check if the domain works
+   * @return {Promise}
+   */
+  validateSettings(settingsPOJO){
+    if(settingsPOJO && settingsPOJO.serverDomain){
+      return fetch('https://' + settingsPOJO.serverDomain + '/api/hello');
+    }
+    else{
+      return new Promise((resolve, reject) => {
+        reject('server domain cannot be null');
+      });
+    }
   }
 }
 

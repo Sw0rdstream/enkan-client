@@ -1,15 +1,5 @@
+import SettingsPOJO from '../pojos/SettingsPOJO';
 export default class SettingsStatus {
-  /**
-   * domain
-   * @type {String}
-   */
-  serverDomain = "";
-
-  /**
-   * enable push for updates
-   * @type {Boolean}
-   */
-  enablePush = false;
 
   /**
    * the dialog is displayed or not
@@ -17,9 +7,21 @@ export default class SettingsStatus {
    */
   display = false;
 
-  static STATUS_FORM_DONE = 0;
-  static STATUS_FORM_SUBMITTING = 1;
-  formStatus = SettingsStatus.STATUS_FORM_DONE;
+  /**
+   * settings
+   * @type {SettingsPOJO}
+   */
+  settingsPojo = new SettingsPOJO();
 
-  static currentSetting = null;
+  /**
+   * settings
+   * @type {SettingsPOJO}
+   */
+  newSettingsPojo = new SettingsPOJO();
+
+  constructor(state){
+    if(state){
+      Object.assign(this, state);
+    }
+  }
 }

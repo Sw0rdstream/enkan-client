@@ -22,7 +22,7 @@ export default class AppListStatus {
    * Loading Status
    * @type {Number}
    */
-  loadStatus = AppListStatus.LOAD_STATUS_NO_SETTING;
+  loadStatus = AppListStatus.LOAD_STATUS_INIT_LOADING;
 
   constructor(appListStatus){
     if(appListStatus){
