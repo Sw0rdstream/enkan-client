@@ -125,6 +125,7 @@ const initSettingsState = new SettingsStatus();
 const SETTINGS_ACTION_SHOW = 'SETTINGS_ACTION_SHOW';
 const SETTINGS_ACTION_HIDE = 'SETTINGS_ACTION_HIDE';
 const SETTINGS_ACTION_UPDATE = 'SETTINGS_ACTION_UPDATE';
+const SETTINGS_ACTION_FORM_DOMAIN_CHANGE = 'SETTINGS_ACTION_FORM_DOMAIN_CHANGE';
 
 export function settingsState(state = initSettingsState, action){
   if(!action.type.startsWith('SETTINGS_ACTION_')){
@@ -137,6 +138,14 @@ export function settingsState(state = initSettingsState, action){
       break;
     case SETTINGS_ACTION_SHOW:
       newState.display = true;
+      break;
+    case SETTINGS_ACTION_FORM_DOMAIN_CHANGE:
+      newState.settingsPojo.serverDomain = action.serverDomain;
+      break;
+    case SETTINGS_ACTION_UPDATE:
+      newState.display = false;
+      console.log(action.settingsPojo);
+      newState.settingsPojo = action.settingsPojo;
       break;
   }
   return newState;
@@ -151,5 +160,18 @@ export function settingsActionShow(){
 export function settingsActionHide(){
   return {
     type:SETTINGS_ACTION_HIDE
+  };
+}
+
+export function settingsActionUpdate(settingsPojo){
+  return {
+    type:SETTINGS_ACTION_UPDATE,
+    settingsPojo
+  };
+}
+export function settingsActionUpdateInput(textDomain){
+  return {
+    type:SETTINGS_ACTION_FORM_DOMAIN_CHANGE,
+    serverDomain:textDomain
   };
 }

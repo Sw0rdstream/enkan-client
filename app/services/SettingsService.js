@@ -1,41 +1,54 @@
-import {Settings} from 'react-native';
+import {AsyncStorage} from 'react-native';
 import SettingsPOJO from '../pojos/SettingsPOJO';
 
 class SettingsService {
 
   currentSettings = null;
-  static SETTINGS_DICT_DOMAIN = 'Settings.Domain';
-  static SETTINGS_DICT_ENABLEPUSH = 'Settings.EnablePush';
+  static STORAGE_DICT_SETTINGS = 'SettingsService.Settings';
 
   dispatch = null;
 
   getCurrentSettings(){
-    if(this.currentSettings == null){
-      this.reloadSettings();
-    }
     return this.currentSettings;
   }
 
   updateSettings(settingsPOJO){
-    let settingObj = {};
-    settingObj[SettingsService.SETTINGS_DICT_DOMAIN] = settingsPOJO.serverDomain;
-    settingObj[SettingsService.SETTINGS_DICT_ENABLEPUSH] = settingsPOJO.enablePush;
-    Settings.set(settingObj);
-    this.reloadSettings();
+    return new Promise(((resolve, reject) => {
+      AsyncStorage.setItem(SettingsService.STORAGE_DICT_SETTINGS, JSON.stringify(settingsPOJO), ((err) => {
+        if(err){
+          reject(err);
+        }
+        else{
+          this.currentSettings = settingsPOJO;
+          resolve();
+        }
+      }).bind(this))
+    }).bind(this));
   }
 
   reloadSettings(){
-    const currentDomain = Settings.get(SettingsService.SETTINGS_DICT_DOMAIN);
-    const currentEnablePush = Settings.get(SettingsService.SETTINGS_DICT_ENABLEPUSH);
-    if(currentDomain && currentDomain.length > 0){
-      this.currentSettings = new SettingsService();
-      this.currentSettings.serverDomain = currentDomain;
-      this.currentSettings.enablePush = currentEnablePush;
-    }
-    else{
-      this.currentSettings = null;
-    }
-    return this.currentSettings;
+    return new Promise(((resolve, reject) => {
+      AsyncStorage.getItem(SettingsService.STORAGE_DICT_SETTINGS,((err,val)=>{
+        if(err){
+          reject(err, val);
+        }
+        else{
+          if(val){
+            try{
+              this.currentSettings = new SettingsPOJO(JSON.parse(val));
+            }
+            catch(ex){
+              alert('Data is corrupted, please reset');
+              this.currentSettings = null;
+            }
+          }
+          else{
+            this.currentSettings = null;
+          }
+          resolve(this.currentSettings);
+        }
+      }).bind(this));
+    }).bind(this));
   }
 
   /**

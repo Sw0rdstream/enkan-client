@@ -13,12 +13,6 @@ export default class SettingsStatus {
    */
   settingsPojo = new SettingsPOJO();
 
-  /**
-   * settings
-   * @type {SettingsPOJO}
-   */
-  newSettingsPojo = new SettingsPOJO();
-
   constructor(state){
     if(state){
       Object.assign(this, state);

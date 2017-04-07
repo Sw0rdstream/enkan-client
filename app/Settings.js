@@ -19,7 +19,7 @@ import {
 import {addNavigationHelpers, StackNavigator} from 'react-navigation';
 
 import { connect } from 'react-redux';
-import { settingsActionHide, startPullList } from './redux';
+import { settingsActionHide, startPullList,settingsActionUpdateInput } from './redux';
 import ReduxService from './global/ReduxService';
 import SettingsService from './services/SettingsService';
 import SettingsStatus from './redux-status/SettingsStatus';
@@ -49,19 +49,27 @@ class SettingsMainPage extends Component {
           <Button styleName="clear" onPress={() => {
             const currentState = ReduxService.store.getState().settingsState;
             setParams({validating:true});
-            SettingsService.validateSettings(currentState.newSettingsPojo).then((res) => {
+            SettingsService.validateSettings(currentState.settingsPojo).then((res) => {
+              console.log(res);
               if(res.status == 200){
-                setParams({validating:false});
-                SettingsService.updateSettings(currentState.newSettingsPojo);
-                SettingsController.resolveUpdateSettings();
+                res.text().then((text)=>{
+                  if(!text || text.length == 0){
+                    setParams({validating:false});
+                    SettingsController.resolveUpdateSettings(currentState.settingsPojo);
+                  }
+                  else{
+                    setParams({validating:false});
+                    alert('This is not a server for SanadaMaru.');
+                  }
+                });
               }
               else{
-                alert('Server has problems.');
                 setParams({validating:false});
+                alert('Server has problems.');
               }
             }).catch(()=>{
-              alert('Server cannot be connected. ');
               setParams({validating:false});
+              alert('Server cannot be connected. ');
             });
           }}><Text>Update</Text></Button>
         </View>
@@ -71,14 +79,17 @@ class SettingsMainPage extends Component {
   };
 
   render() {
-    let {settingsPojo, newSettingsPojo} = this.props.screenProps;
+    let {settingsPojo} = this.props.screenProps;
     return (
       <Screen style={{flex:1}}>
         <View>
         <Row>
           <View styleName="vertical stretch">
             <Text>Server Domain</Text>
-            <TextInput autoCapitalize={'none'} autoCorrect={false} style={{padding:0}} placeholder={'e.g. hue-smartdevice.sv.workslan'} value={settingsPojo.serverDomain} onChangeText={(text) => {newSettingsPojo.serverDomain = text;}} />
+            <TextInput autoCapitalize={'none'} autoCorrect={false} style={{padding:0}}
+              placeholder={'e.g. hue-smartdevice.sv.workslan'}
+              value={settingsPojo.serverDomain}
+              onChangeText={(text) => {ReduxService.dispatch(settingsActionUpdateInput(text))}} />
           </View>
         </Row>
         <Row>

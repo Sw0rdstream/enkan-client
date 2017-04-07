@@ -1,16 +1,21 @@
-import {settingsActionShow,settingsActionHide, showInitialRequest, showErrorList, loadAppList } from '../redux'
+import {settingsActionShow,settingsActionUpdate, showInitialRequest, showErrorList, loadAppList } from '../redux'
 import ReduxService from '../global/ReduxService';
 import SettingsService from '../services/SettingsService';
 import AppListService from '../services/AppListService';
 class SettingsController{
-  resolveUpdateSettings(){
-    ReduxService.dispatch(settingsActionHide());
+  resolveUpdateSettings(settingsPojo){
+    ReduxService.dispatch(settingsActionUpdate(settingsPojo));
     ReduxService.dispatch(showInitialRequest());
-    AppListService.loadAppList().then((resJson) => {
-      ReduxService.dispatch(loadAppList(resJson));
+    SettingsService.updateSettings(settingsPojo).then(()=>{
+      AppListService.loadAppList().then((resJson) => {
+        ReduxService.dispatch(loadAppList(resJson));
+      }).catch(()=>{
+        ReduxService.dispatch(showErrorList());
+      });
     }).catch(()=>{
-      ReduxService.dispatch(showErrorList());
+      alert('Please enable storage access for SanadaMaru')
     });
+
   }
 }
 export default new SettingsController();

@@ -8,7 +8,7 @@ import {ListView, RefreshControl, Modal} from 'react-native';
 import * as Progress from 'react-native-progress';
 
 import { connect } from 'react-redux';
-import { navigatePush, appListState, loadAppList,startPullList, settingsActionShow, showErrorList, showNoSettings} from './redux';
+import { navigatePush, appListState, loadAppList,startPullList, settingsActionShow, showErrorList, showNoSettings, settingsActionUpdate} from './redux';
 import {downloadApp} from './services/AppDownloadService';
 import AppListStatus from './redux-status/AppListStatus';
 
@@ -49,18 +49,26 @@ class AppList extends Component {
   }
 
   componentDidMount(){
-    let {actionPopSettings,showErrorPage, showNoSettingsPage} = this.props;
-    AppListService.loadAppList().then((applistJson) => {
-      this.props.onLoadFinish(applistJson);
-    }).catch((rejectCode) => {
-      if(rejectCode == AppListService.LOAD_REJECT_NOSETTING){
-        showNoSettingsPage();
-        actionPopSettings();
+    let {actionPopSettings,showErrorPage, showNoSettingsPage, settingsChanged} = this.props;
+    // TODO: Use a new controller to solve this bad code
+    SettingsService.reloadSettings().then((currentSettings) => {
+      if(currentSettings && currentSettings.serverDomain){
+        settingsChanged(currentSettings);
       }
-      else{
-        showErrorPage();
-      }
-    })
+      AppListService.loadAppList().then((applistJson) => {
+        this.props.onLoadFinish(applistJson);
+      }).catch((rejectCode) => {
+        if(rejectCode == AppListService.LOAD_REJECT_NOSETTING){
+          showNoSettingsPage();
+          actionPopSettings();
+        }
+        else{
+          showErrorPage();
+        }
+      });
+    }).catch(()=>{
+      alert('Please enable storage access for SanadaMaru');
+    });
   }
 
 
@@ -103,9 +111,8 @@ class AppList extends Component {
   }
 
   renderSettingsModal(){
-    console.log(this.props.settingsState);
     return(
-      <Modal animationType={"slide"} transparent={true} visible={this.props.settingsState.display}>
+      <Modal animationType={"slide"} transparent={true} visible={this.props.settingsState.display} onRequestClose={()=>{}}>
         <View style={{flex:1}}>
           <Settings screenProps={this.props.settingsState} />
         </View>
@@ -197,6 +204,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     showNoSettingsPage: () => {
       dispatch(showNoSettings());
+    },
+    settingsChanged: (settingsPojo) => {
+      dispatch(settingsActionUpdate(settingsPojo))
     }
   };
 };
