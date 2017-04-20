@@ -188,7 +188,7 @@ class AppList extends Component {
 const mapDispatchToProps = (dispatch) => {
   return {
     onDownloadPress: (appData) => {
-      downloadApp(dispatch, appData.data.bundleId);
+      downloadApp(dispatch, appData.data.bundleId, SettingsService.getCurrentSettings().serverDomain);
     },
     onLoadFinish: (list) => {
       dispatch(loadAppList(list));

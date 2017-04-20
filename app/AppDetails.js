@@ -15,7 +15,7 @@ import {
   Button,
   Caption
 } from '@shoutem/ui';
-
+import SettingsService from './services/SettingsService';
 import {
   NavigationBar,
 } from '@shoutem/ui/navigation';
@@ -105,7 +105,7 @@ class AppDetails extends Component {
 
 const mapDispatchToProps = (dispatch) => ({
   onDownloadPress: (appData) => {
-    downloadApp(dispatch, appData.data.bundleId);
+    downloadApp(dispatch, appData.data.bundleId, SettingsService.getCurrentSettings().serverDomain);
   }
 });
 
